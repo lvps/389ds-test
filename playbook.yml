@@ -12,40 +12,53 @@
     become: true
     yum:
       name: 389-ds-base
-      state: installed
+      state: latest
+    register: ds389_install_state
 
-  - name: add user 'ldap'
+  # as suggested by Red Hat Directory Server manual
+  - name: add user 'dirsrv'
     become: true
     user:
-      name: ldap
+      name: dirsrv
       comment: System user for 389DS
       system: true
       create_home: false
 
-  - name: create server dir
+  - name: check if instance directory exists
     become: true
-    file:
-      path: /srv/ldap
-      state: directory
-      owner: ldap
-      group: ldap
-      mode: 0770
-    #when: ...
+    stat:
+      path: "/var/lib/dirsrv/slapd-{{ instance }}"
+    register: instance_dir
 
-  - name: copy install.inf
+  - set_fact:
+      instance_dir_exists: "{{ instance_dir.stat.exists and instance_dir.stat.isdir }}"
+
+  - name: copy 389ds_install.inf
     become: true
     template:
       src: install.inf.j2
-      dest: /tmp/install.inf
-      owner: ldap
-      group: ldap
+      dest: /tmp/389ds_install.inf
+      owner: dirsrv
+      group: dirsrv
       mode: 0660
-    #when: ...
+    when: not instance_dir_exists
 
   - name: execute install script
     become: true
-    command: setup-ds.pl --silent --file=/tmp/install.inf
-    #when: ...
+    command: setup-ds.pl --silent --file=/tmp/389ds_install.inf
+    args:
+      creates: /var/lib/dirsrv/slapd-{{ instance }}
+
+  - name: remove 389ds_install.inf (contains plaintext password)
+    become: true
+    file:
+      path: /tmp/389ds_install.inf
+      state: absent
+
+  - name: execute update script (if a new version was installed)
+    become: true
+    command: setup-ds.pl --silent --update
+    when: instance_dir_exists and ds389_install_state.changed
 
   - name: start and enable 389DS
     become: true

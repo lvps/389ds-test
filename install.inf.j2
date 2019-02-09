@@ -1,12 +1,13 @@
 #
 # {{ ansible_managed }}
 #
+# Supported directives:
+# https://access.redhat.com/documentation/en-us/red_hat_directory_server/9.0/html/installation_guide/Advanced_Configuration-Silent#Advanced_Configuration-inf-File-directives
 
 [General]
 FullMachineName = {{ ansible_fqdn }}
-SuiteSpotUserID = ldap
-SuiteSpotGroup = ldap
-ServerRoot = /srv/ldap
+SuiteSpotUserID = dirsrv
+SuiteSpotGroup = dirsrv
 
 [slapd]
 ServerPort = 389
