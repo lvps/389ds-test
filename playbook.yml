@@ -1,0 +1,55 @@
+---
+- hosts: all
+  become: false
+  vars:
+    version: "4.3.3"
+    instance: "example" # will produce a "slapd-example" dir
+    primary_suffix: "dc=example,dc=com"
+    password: "secret"
+
+  tasks:
+  - name: install 389 Directory Service
+    become: true
+    yum:
+      name: 389-ds-base
+      state: installed
+
+  - name: add user 'ldap'
+    become: true
+    user:
+      name: ldap
+      comment: System user for 389DS
+      system: true
+      create_home: false
+
+  - name: create server dir
+    become: true
+    file:
+      path: /srv/ldap
+      state: directory
+      owner: ldap
+      group: ldap
+      mode: 0770
+    #when: ...
+
+  - name: copy install.inf
+    become: true
+    template:
+      src: install.inf.j2
+      dest: /tmp/install.inf
+      owner: ldap
+      group: ldap
+      mode: 0660
+    #when: ...
+
+  - name: execute install script
+    become: true
+    command: setup-ds.pl --silent --file=/tmp/install.inf
+    #when: ...
+
+  - name: start and enable 389DS
+    become: true
+    service:
+      name: dirsrv@{{ instance }}
+      state: started
+      enabled: yes

@@ -1,0 +1,16 @@
+#
+# {{ ansible_managed }}
+#
+
+[General]
+FullMachineName = {{ ansible_fqdn }}
+SuiteSpotUserID = ldap
+SuiteSpotGroup = ldap
+ServerRoot = /srv/ldap
+
+[slapd]
+ServerPort = 389
+ServerIdentifier = {{ instance }}
+Suffix = {{ primary_suffix }}
+RootDN = cn=Directory Manager
+RootDNPwd = {{ password }}
