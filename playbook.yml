@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  #roles:
+  #  - geerlingguy.repo-epel
   become: false
   vars:
     version: "4.3.3"
@@ -14,6 +16,12 @@
       name: 389-ds-base
       state: latest
     register: ds389_install_state
+
+  #- name: install 389 admin server
+  #  become: true
+  #  yum:
+  #    name: 389-admin
+  #    state: latest
 
   # as suggested by Red Hat Directory Server manual
   - name: add user 'dirsrv'
@@ -63,6 +71,13 @@
   - name: start and enable 389DS
     become: true
     service:
-      name: dirsrv@{{ instance }}
+      name: dirsrv.target
       state: started
       enabled: yes
+
+#  - name: start and enable 389 admin server
+#    become: true
+#    service:
+#      name: dirsrv-admin
+#      state: started
+#      enabled: yes

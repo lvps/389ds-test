@@ -8,6 +8,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   config.vm.network "forwarded_port", guest: 389, host: 1389, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 9830, host: 9830, host_ip: "127.0.0.1"
 
   config.vm.provider "virtualbox" do |v|
 	  v.name = "389ds-test"
